@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('home') }}" style="font-size: 18px;">← Назад до категорій</a>
+</div>
+
+<h2>{{ category_title }}</h2>
+
+{% if quizzes %}
+    {% for quiz in quizzes %}
+        <div class="quiz-card">
+            <h3>{{ quiz.title }}</h3>
+            <p>{{ quiz.description }}</p>
+            <p><strong>Кількість питань:</strong> {{ quiz.questions|length }}</p>
+            <div class="flex-buttons">
+                <a href="{{ url_for('take_quiz', quiz_id=quiz.quiz_id) }}" class="btn-start">▶️ Почати тест</a>
+                {% if session.user_id == quiz.author_id %}
+                    <a href="{{ url_for('edit_quiz', quiz_id=quiz.quiz_id) }}" class="btn-edit">✏️ Редагувати</a>
+                    <a href="{{ url_for('delete_quiz', quiz_id=quiz.quiz_id) }}" class="btn-delete" onclick="return confirm('Ви впевнені, що хочете видалити цей тест?')">🗑️ Видалити</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-category">
+        <p>😕 У цій категорії поки немає тестів.</p>
+        <p><a href="{{ url_for('add_quiz') }}">Створіть перший тест у цій категорії!</a></p>
+    </div>
+{% endif %}
+
+<style>
+    .empty-category {
+        text-align: center;
+        padding: 50px;
+        background: rgba(76, 175, 80, 0.05);
+        border-radius: 15px;
+        margin-top: 30px;
+    }
+    
+    .quiz-card {
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .flex-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .btn-start {
+        background-color: var(--accent);
+        padding: 5px 15px;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-edit {
+        background-color: #2196F3;
+        padding: 5px 15px;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-delete {
+        background-color: #f44336;
+        padding: 5px 15px;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}

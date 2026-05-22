@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>📊 Мої результати</h2>
+{% if results %}
+    {% for res in results %}
+        <div class="result-card">
+            <strong>{{ res.quiz_title }}</strong><br>
+            Оцінка: {{ res.score }} / {{ res.total }} ({{ "%.1f"|format(res.percentage) }}%)<br>
+            <small>Дата: {{ res.date }}</small>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Ви ще не пройшли жодного тесту.</p>
+{% endif %}
+{% endblock %}

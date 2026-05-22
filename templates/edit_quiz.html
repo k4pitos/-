@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>✏️ Редагування тесту: {{ quiz.title }}</h2>
+
+<form method="POST" id="quizForm" enctype="multipart/form-data">
+    <input type="text" name="title" value="{{ quiz.title }}" placeholder="Назва тесту" required>
+    <textarea name="description" placeholder="Опис тесту" rows="3">{{ quiz.description }}</textarea>
+    
+    <select name="category" required style="width: 100%; padding: 10px; margin: 10px 0;">
+        <option value="cars" {% if quiz.category == 'cars' %}selected{% endif %}>🚗 Марки автомобілів</option>
+        <option value="countries" {% if quiz.category == 'countries' %}selected{% endif %}>🌍 Місцевість (Країни)</option>
+        <option value="rebus" {% if quiz.category == 'rebus' %}selected{% endif %}>🧩 Ребуси</option>
+    </select>
+    
+    <div id="questionsContainer">
+        {% for q in quiz.questions %}
+            <div class="question-group">
+                <h3>Питання {{ loop.index }}</h3>
+                <input type="text" name="question_title" value="{{ q.text }}" placeholder="Текст питання" required>
+                
+                {% if q.image %}
+                    <div class="current-image">
+                        <img src="{{ q.image }}" style="max-width: 200px; border-radius: 8px;">
+                        <input type="hidden" name="existing_image" value="{{ q.image }}">
+                    </div>
+                {% else %}
+                    <input type="hidden" name="existing_image" value="">
+                {% endif %}
+                
+                <input type="file" name="question_image" accept="image/*" class="image-input">
+                <div class="image-preview"></div>
+                
+                <input type="text" name="opt1" value="{{ q.options[0] }}" placeholder="Варіант 1" required>
+                <input type="text" name="opt2" value="{{ q.options[1] }}" placeholder="Варіант 2" required>
+                <input type="text" name="opt3" value="{{ q.options[2] }}" placeholder="Варіант 3" required>
+                <input type="text" name="correct" value="{{ q.correct }}" placeholder="Правильна відповідь" required>
+                <button type="button" class="remove-btn" onclick="removeQuestion(this)">❌ Видалити питання</button>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <button type="button" onclick="addQuestion()">➕ Додати питання</button>
+    <button type="submit">💾 Зберегти зміни</button>
+    <a href="{{ url_for('home') }}">↩️ Назад</a>
+</form>
+
+<script>
+    function addQuestion() {
+        const container = document.getElementById('questionsContainer');
+        const groups = container.getElementsByClassName('question-group');
+        const newNumber = groups.length + 1;
+        
+        const newDiv = document.createElement('div');
+        newDiv.className = 'question-group';
+        newDiv.innerHTML = '<h3>Питання ' + newNumber + '</h3>' +
+            '<input type="text" name="question_title" placeholder="Текст питання" required>' +
+            '<input type="hidden" name="existing_image" value="">' +
+            '<input type="file" name="question_image" accept="image/*" class="image-input">' +
+            '<div class="image-preview"></div>' +
+            '<input type="text" name="opt1" placeholder="Варіант 1" required>' +
+            '<input type="text" name="opt2" placeholder="Варіант 2" required>' +
+            '<input type="text" name="opt3" placeholder="Варіант 3" required>' +
+            '<input type="text" name="correct" placeholder="Правильна відповідь" required>' +
+            '<button type="button" class="remove-btn" onclick="removeQuestion(this)">❌ Видалити питання</button>';
+        
+        container.appendChild(newDiv);
+        
+        const fileInput = newDiv.querySelector('.image-input');
+        const preview = newDiv.querySelector('.image-preview');
+        fileInput.addEventListener('change', function(e) {
+            previewImage(this, preview);
+        });
+    }
+    
+    function removeQuestion(btn) {
+        if (confirm('Видалити це питання?')) {
+            const questionGroup = btn.parentElement;
+            questionGroup.remove();
+            
+            const groups = document.querySelectorAll('.question-group');
+            for (let i = 0; i < groups.length; i++) {
+                const h3 = groups[i].querySelector('h3');
+                h3.textContent = 'Питання ' + (i + 1);
+            }
+        }
+    }
+    
+    function previewImage(input, previewDiv) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewDiv.innerHTML = '<div style="text-align: center;"><img src="' + e.target.result + '" style="max-width: 200px; max-height: 150px; margin: 10px 0; border-radius: 8px;"></div>';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    document.querySelectorAll('.image-input').forEach(input => {
+        const preview = input.parentElement.querySelector('.image-preview');
+        input.addEventListener('change', function(e) {
+            previewImage(this, preview);
+        });
+    });
+</script>
+
+<style>
+    .question-group {
+        border: 1px solid var(--accent);
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        background: rgba(76, 175, 80, 0.05);
+    }
+    
+    .remove-btn {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: auto;
+        margin-top: 10px;
+    }
+    
+    .current-image {
+        margin: 10px 0;
+    }
+    
+    .image-preview {
+        text-align: center;
+    }
+    
+    select {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

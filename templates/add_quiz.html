@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>➕ Створити новий тест</h2>
+<form method="POST" id="quizForm" enctype="multipart/form-data">
+    <input type="text" name="title" placeholder="Назва тесту" required>
+    <textarea name="description" placeholder="Опис тесту" rows="3"></textarea>
+    
+    <select name="category" required style="width: 100%; padding: 10px; margin: 10px 0;">
+        <option value="">-- Виберіть категорію --</option>
+        <option value="cars">🚗 Марки автомобілів</option>
+        <option value="countries">🌍 Місцевість (Країни)</option>
+        <option value="rebus">🧩 Ребуси</option>
+    </select>
+    
+    <div id="questionsContainer">
+        <div class="question-group" data-index="0">
+            <h3>Питання 1</h3>
+            <input type="text" name="question_title" placeholder="Текст питання" required>
+            <label>📷 Додати картинку (необов'язково):</label>
+            <input type="file" name="question_image" accept="image/*" class="image-input">
+            <div class="image-preview"></div>
+            <input type="text" name="opt1" placeholder="Варіант 1" required>
+            <input type="text" name="opt2" placeholder="Варіант 2" required>
+            <input type="text" name="opt3" placeholder="Варіант 3" required>
+            <input type="text" name="correct" placeholder="Правильна відповідь" required>
+        </div>
+    </div>
+    
+    <button type="button" onclick="addQuestion()">➕ Додати питання</button>
+    <button type="submit">💾 Зберегти тест</button>
+</form>
+
+<script>
+    let qCount = 1;
+    
+    function addQuestion() {
+        qCount++;
+        const container = document.getElementById('questionsContainer');
+        const newDiv = document.createElement('div');
+        newDiv.className = 'question-group';
+        newDiv.innerHTML = `
+            <h3>Питання ${qCount}</h3>
+            <input type="text" name="question_title" placeholder="Текст питання" required>
+            <label>📷 Додати картинку (необов'язково):</label>
+            <input type="file" name="question_image" accept="image/*" class="image-input">
+            <div class="image-preview"></div>
+            <input type="text" name="opt1" placeholder="Варіант 1" required>
+            <input type="text" name="opt2" placeholder="Варіант 2" required>
+            <input type="text" name="opt3" placeholder="Варіант 3" required>
+            <input type="text" name="correct" placeholder="Правильна відповідь" required>
+            <button type="button" class="remove-btn" onclick="removeQuestion(this)">❌ Видалити питання</button>
+        `;
+        container.appendChild(newDiv);
+        
+        const fileInput = newDiv.querySelector('.image-input');
+        const preview = newDiv.querySelector('.image-preview');
+        fileInput.addEventListener('change', function(e) {
+            previewImage(this, preview);
+        });
+    }
+    
+    function removeQuestion(btn) {
+        if (confirm('Видалити це питання?')) {
+            const questionGroup = btn.closest('.question-group');
+            questionGroup.remove();
+            const groups = document.querySelectorAll('.question-group');
+            groups.forEach((group, idx) => {
+                const h3 = group.querySelector('h3');
+                h3.textContent = `Питання ${idx + 1}`;
+            });
+            qCount = groups.length;
+        }
+    }
+    
+    function previewImage(input, previewDiv) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewDiv.innerHTML = `<div style="text-align: center;"><img src="${e.target.result}" style="max-width: 200px; max-height: 150px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--accent);"></div>`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            previewDiv.innerHTML = '';
+        }
+    }
+    
+    document.querySelectorAll('.image-input').forEach(input => {
+        const preview = input.parentElement.querySelector('.image-preview');
+        input.addEventListener('change', function(e) {
+            previewImage(this, preview);
+        });
+    });
+</script>
+
+<style>
+    .question-group {
+        border: 1px solid var(--accent);
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        background: rgba(76, 175, 80, 0.05);
+    }
+    
+    .remove-btn {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: auto;
+        margin-top: 10px;
+    }
+    
+    .image-input {
+        padding: 8px;
+        margin: 5px 0;
+    }
+    
+    .image-preview {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    
+    select {
+        cursor: pointer;
+    }
+    
+    label {
+        display: block;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-size: 14px;
+        color: var(--accent);
+    }
+</style>
+{% endblock %}

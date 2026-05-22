@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>🎉 Ваш результат</h2>
+<div class="score">
+    {{ result.score }} / {{ result.total }}
+</div>
+<div class="score">
+    {{ "%.1f"|format(result.percentage) }}%
+</div>
+<a href="{{ url_for('home') }}">🏠 На головну</a>
+{% endblock %}
